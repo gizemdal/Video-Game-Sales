@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en"> 
+	<head>
+		<meta charset="utf-8">
+		<title>D3 Page Template</title>
+		<link rel="stylesheet" href="style.css">
+		<script type="text/javascript" src="d3/d3.js"></script>
+    </head>
+    <body>
+    	<div id="tooltip_1" class="hidden_1">
+    		<p><strong>Info:</strong></p>
+    		<p><span id="value_1">100</span></p>
+    	</div>
+    	<div id="tooltip_2" class="hidden_2">
+    		<p><span id="value_2">100</span></p>
+    	</div>
+		<script type="text/javascript">
+			var platform_data; // to be filled later
+			var top_five_data; // to be filled later
+			var sale_data; // to be filled later
+			var max_platform_sale; // to be filled later
+
+			var scatter; // to be filled later
+			var is_init_scatter = false;
+
+			var list_of_years = function() {
+				years = [];
+				for (var i = 0; i < sale_data.length; i++) {
+					years.push(sale_data[i]["year"]);
+				}
+				return years;
+			};
+
+			// Fill in top_five_data
+			var top_five = function(dataset) {
+				var top_five = [];
+				for (var i = 0; i < Object.keys(dataset[0]).length - 1; i++) {
+					var dict = {};
+					dict["year"] = i + 1980;
+					var values = [maxEntry_year(dict["year"], dataset)];
+					values.push(maxEntry_year(dict["year"], dataset));
+					values.push(maxEntry_year(dict["year"], dataset));
+					values.push(maxEntry_year(dict["year"], dataset));
+					values.push(maxEntry_year(dict["year"], dataset));
+					dict["values"] = values;
+					top_five.push(dict);
+				}
+				return top_five;
+			};
+
+			// return maximum (numeric) entry value from platform_data
+			var maxEntry = function(dataset) {
+				var max_val = -1;
+				for (var i = 0; i < dataset.length; i++) {
+					data = dataset[i];
+					Object.keys(data).forEach(function(key) {
+						var value = data[key];
+						if ((typeof value === "number")) {
+							if (value > max_val) {
+								max_val = value;
+							}
+						}
+					});
+				}
+				return max_val;
+			};
+
+			var maxEntry_year = function(year, dataset) {
+				// get tag for year
+				var year_label = "year_" + year;
+				var max_val = -1;
+				var max_platform;
+				var idx = -1;
+				for (var i = 0; i < dataset.length; i++) {
+					var data = dataset[i];
+					if (data[year_label] > max_val) {
+						max_val = data[year_label];
+						max_platform = data["platform"];
+						idx = i;
+					}
+				}
+				// set used value to -99 before returning
+				dataset[idx][year_label] = -99;
+				return [max_val, max_platform];
+			};
+
+			var generateDivs = function() {
+				// add title
+				var svg_title = d3.select("body")
+								.append("text")
+				   				.attr("class", "svg-title")
+				   				.attr("id", "header")
+				   				.attr("x", 20)
+				   				.attr("y", 20)
+				   				.text("Global Video Game Sales Per Year");
+
+				// add explanatory paragraph
+				var svg_explain = d3.select("body")
+								  .append("p")
+								  .attr("class", "svg-info")
+								  .attr("id", "header")
+								  .text("Below is a bar chart that displays the amount of global sales (in millions) per year made from top video games per year. You can hover over the bars to get numeric detail and visualize the number of sales made by the top 5 popular platforms in a given year below the bar chart. You can also see the exact numbers when you hover over the points on the scatter plot generated below.");
+
+				// Simple bar chart made of divs
+				var size_factor = 1.3; // sizing factor
+				var w = 1200 / size_factor; // width
+				var h = 775 / size_factor; // height
+				var bar_padding = 20 / size_factor; // padding
+				var bar_width = 15 / size_factor; // bar width
+
+				// X and Y scales
+
+				var xScale = d3.scaleLinear()
+							 .domain([d3.min(sale_data, function(d) { return d["year"]; }), 
+							 d3.max(sale_data, function(d) { return d["year"]; })])
+							 .range([bar_padding + bar_width / 2, (w - (bar_padding / 2 + bar_width / 2))]);
+				var yScale = d3.scaleLinear()
+				             .domain([d3.max(sale_data, function(d) { return d["sales"]; }), 0])
+				             .range([1.5 / size_factor, (d3.max(sale_data, function(d) { return d["sales"] + 1.5; })) / size_factor ]);
+
+				var svg = d3.select("body")
+							.append("svg")
+							.attr("class", "svg")
+							.attr("width", w)
+							.attr("height", h);
+
+				svg.selectAll("rect")
+			    .data(sale_data)
+			    .enter()
+			    .append("rect")
+			    .attr("fill", function(d) {
+			    	var strength = (d["sales"] * (255)) / (d3.max(sale_data, function(d) { return d["sales"]; }));
+			   		return "rgb(" + (255 - Math.floor(strength)) + ", 255, " + (255 - Math.floor(strength)) + ")";
+			    })
+				.attr("y", function(d) {
+					return h - (d["sales"] / size_factor + 1.5) - bar_padding * 2;
+				})
+				.attr("x", function(d, i) {
+					var dist = i * ((w - bar_padding) / sale_data.length);
+				   	return dist + bar_padding;
+				})
+				.style("width", bar_width + "px")
+				.style("height", function(d) {
+					return (d["sales"] + 1.5) / size_factor + "px";
+				})
+				.on("mouseover", function(d) {
+					d3.select(this)
+					  .attr("fill", "orange")
+					  var xPosition = parseFloat(d3.select(this).attr("x")) + bar_padding; 
+					  var yPosition = parseFloat(d3.select(this).attr("y")) + 30;
+					  //Update the tooltip position and value
+					  d3.select("#tooltip_1")
+					  .style("left", xPosition + "px")
+					  .style("top", yPosition + "px")
+					  .select("#value_1")
+					  .text("Year: " + d["year"] + ", Global Sales: " + d["sales"].toFixed(2));
+					  //Show the tooltip
+					  d3.select("#tooltip_1").classed("hidden_1", false);
+					  if (!is_init_scatter) {
+					  	initScatter();
+					  	is_init_scatter = true;
+					  }
+					  if (is_init_scatter) {
+					  	scatterPlot(d["year"]);
+					  }
+
+				})
+				.on("mouseout", function(d) {
+					d3.select(this)
+					  .transition()
+          			  .duration(250)
+					  .attr("fill", function(d) {
+			    		var strength = (d["sales"] * (255)) / (d3.max(sale_data, function(d) { return d["sales"]; }));
+			   			return "rgb(" + (255 - Math.floor(strength)) + ", 255, " + (255 - Math.floor(strength)) + ")";
+					  });
+					//Hide the tooltip
+					d3.select("#tooltip_1").classed("hidden_1", true);
+				});
+
+				// Add axis
+
+				var xAxis = d3.axisBottom(xScale)
+							.tickValues(list_of_years())
+							.tickFormat(d3.format("d"));
+				var yAxis = d3.axisLeft()
+				            .scale(yScale);
+
+				svg.append("g")
+				   .attr("class", "axis")
+				   .attr("id", "axis_x")
+        		   .attr("transform", "translate(0," + (h - bar_padding) + ")")
+				   .call(xAxis);
+				svg.append("text")
+				   .attr("class", "y_label")
+				   .attr("text-anchor", "end")
+				   .attr("x", w - bar_padding / 4)
+				   .attr("y", h - 20)
+				   .text("Year");
+				svg.append("text")
+				   .attr("class", "y_label")
+				   .attr("text-anchor", "end")
+				   .attr("x", bar_padding * 7.5)
+				   .attr("y", bar_padding * 2.5)
+				   .text("Global Sales (in millions)");
+				svg.append("g")
+				   .attr("class", "axis")
+				   .attr("id", "axis_y")
+				   .attr("transform", "translate(" + (bar_padding) + "," + 53 / size_factor + ")")
+				   .call(yAxis)
+			};
+
+			var initScatter = function() {
+				var scatter_w = 600; // width
+				var scatter_h = 700; // height
+				scatter = d3.select("body")
+							.append("svg")
+							.attr("class", "svg")
+							.attr("width", scatter_w)
+							.attr("height", scatter_h);
+			}
+
+			var scatterPlot = function(year) {
+				var w = 600; // width
+				var r = 10; // radius
+				var circle_padding = 30; // padding
+				var sub_data = top_five_data[year - 1980]["values"];
+				var h = (r * 2) * sub_data.length + (circle_padding - r * 2) * (sub_data.length - 1); // height
+				var pad = (r * 2) + 70; // padding from the top
+				var bottom_padding = 20;
+				h += (pad + bottom_padding);
+				scatter.attr("height", h); // update height
+				scatter.selectAll("*").remove();
+				scatter.selectAll("circle")
+					   .data(sub_data)
+					   .enter()
+					   .append("circle")
+					   .attr("r", r)
+					   .attr("fill", function(d) {
+					   		return "rgb(0, 255, 0)";
+				   		})
+					   .attr("cx", function(d, i) {
+					   	return circle_padding + d[0];
+					   })
+					   .attr("cy", function(d, i) {
+					   		return pad + i * circle_padding;
+					   })
+					   .on("mouseover", function(d) {
+					   		d3.select(this)
+					  		.attr("fill", "orange");
+					  		var cxPosition = parseFloat(d3.select(this).attr("cx")) + circle_padding + pad; 
+					  		var cyPosition = parseFloat(d3.select(this).attr("cy")) + 775 / 1.3 + pad;
+					  		d3.select("#tooltip_2")
+					  		.style("left", cxPosition + "px")
+					  		.style("top", cyPosition + "px")
+					  		.select("#value_2")
+					  		.text("Global Sales (in millions): " + d[0].toFixed(2));
+					  		d3.select("#tooltip_2").classed("hidden_2", false);
+					   })
+					   .on("mouseout", function(d) {
+					   		d3.select(this)
+					   		.transition()
+          			  		.duration(500)
+					  		.attr("fill", "rgb(0, 255, 0)");
+					  		d3.select("#tooltip_2").classed("hidden_2", true);
+					   });
+				scatter.selectAll('text')
+					   .data(sub_data)
+					   .enter()
+					   .append('text')
+					   .attr("fill", "rgb(255, 255, 255)")
+					   .text(function(d) {
+					   		return d[1];
+					   })
+					   .attr("x", function(d, i) {
+					   	return (circle_padding + d[0] + r);
+					   		//return 25 + i * 20;
+					   })
+					   .attr("y", function(d, i) {
+					   		//return h - (20 + d["year_" + year] * 2.0) - 6;
+					   		return pad + i * circle_padding;
+					   })
+					   .attr("class", "scatter-platform");
+				scatter.append("text")
+					   .attr("x", 50)
+					   .attr("y", 50)
+					   .attr("class", "scatter-title")
+					   .attr("fill", "rgb(0, 255, 0)")
+					   .text("Number of Sales (in millions) for Top 5 Platforms in Year " + year);
+
+				// Add axis
+				var xScale = d3.scaleLinear()
+							 .domain([0, max_platform_sale])
+							 .range([circle_padding, max_platform_sale + circle_padding]);
+				var xAxis = d3.axisBottom(xScale);
+				scatter.append("g")
+				   .attr("class", "axis")
+				   .attr("id", "axis_x")
+        		   .attr("transform", "translate(0," + (h - circle_padding / 1.5) + ")")
+				   .call(xAxis);
+				
+			};
+
+			d3.csv("platform_years.csv", function(d) {
+				return {
+					platform: d.Platform,
+					year_1980: +d.year_1980,
+					year_1981: +d.year_1981,
+					year_1982: +d.year_1982,
+					year_1983: +d.year_1983,
+					year_1984: +d.year_1984,
+					year_1985: +d.year_1985,
+					year_1986: +d.year_1986,
+					year_1987: +d.year_1987,
+					year_1988: +d.year_1988,
+					year_1989: +d.year_1989,
+					year_1990: +d.year_1990,
+					year_1991: +d.year_1991,
+					year_1992: +d.year_1992,
+					year_1993: +d.year_1993,
+					year_1994: +d.year_1994,
+					year_1995: +d.year_1995,
+					year_1996: +d.year_1996,
+					year_1997: +d.year_1997,
+					year_1998: +d.year_1998,
+					year_1999: +d.year_1999,
+					year_2000: +d.year_2000,
+					year_2001: +d.year_2001,
+					year_2002: +d.year_2002,
+					year_2003: +d.year_2003,
+					year_2004: +d.year_2004,
+					year_2005: +d.year_2005,
+					year_2006: +d.year_2006,
+					year_2007: +d.year_2007,
+					year_2008: +d.year_2008,
+					year_2009: +d.year_2009,
+					year_2010: +d.year_2010,
+					year_2011: +d.year_2011,
+					year_2012: +d.year_2012,
+					year_2013: +d.year_2013,
+					year_2014: +d.year_2014,
+					year_2015: +d.year_2015,
+					year_2016: +d.year_2016,
+					year_2017: +d.year_2017,
+					year_2018: +d.year_2018,
+					year_2019: +d.year_2019,
+					year_2020: +d.year_2020
+				};
+			}).then(function(data) {
+				platform_data = data;
+				max_platform_sale = maxEntry(platform_data);
+				top_five_data = top_five(platform_data);
+				// Bar chart for sales
+				d3.csv("years_and_global_sales.csv", function(d) {
+					return {
+						year: +d.Year,
+						sales: +d.Sales
+					};
+				}).then(function(data) {
+					sale_data = data;
+					generateDivs();
+				});
+			});
+
+        </script>
+    </body>
+</html>
