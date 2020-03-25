@@ -89,21 +89,21 @@
 			var determine_color = function(genre) {
 				// find out which genre is passed
 				if (genre === 'Sports') {	
-					return "rgb(128, 255, 0)";
+					return "rgb(0, 255, 128)";
 				} else if (genre === 'Platform') {
 					return "rgb(255, 0, 0)";
 				} else if (genre === 'Racing') {
 					return "rgb(255, 255, 0)";
 				} else if (genre === 'Role-Playing') {
-					return "rgb(255, 128, 0)";
+					return "rgb(255, 0, 127)";
 				} else if (genre === 'Puzzle') {
 					return "rgb(255, 0, 255)";
 				} else if (genre === 'Misc') {
-					return "rgb(255, 0, 127)";
+					return "rgb(255, 127, 0)";
 				} else if (genre === 'Shooter') {
 					return "rgb(0, 0, 255)";
 				} else if (genre === 'Simulation') {
-					return "rgb(0, 255, 128)";
+					return "rgb(128, 255, 0)";
 				} else if (genre === 'Action') {
 					return "rgb(127, 0, 255)";
 				} else if (genre === 'Fighting') {
@@ -133,7 +133,7 @@
 								  .append("p")
 								  .attr("class", "svg-info")
 								  .attr("id", "header")
-								  .text("Below is a bar chart that displays the amount of global sales (in millions) made from top 16000 worldwide video games. Each global sale data represents how many sales the video games that were released in a particular year made in total. You can hover over the bars to get numeric detail and visualize the number of individual global sales made by the top 5 popular platforms through video games that were released in that year. You can also see the exact numbers when you hover over the points on the scatter plot generated below.");
+								  .text("Below is a bar chart that displays the amount of global sales (in millions) made from top 16000 worldwide video games. Each global sale data represents how many sales the video games that were released in a particular year made in total. Colors represent the most popular video game genre in a given year. You can hover over the bars to get numeric detail and visualize the number of individual global sales made by the top 5 popular platforms through video games that were released in that year. You can also see the exact numbers when you hover over the points on the scatter plot generated below.");
 
 				// Simple bar chart made of divs
 				var size_factor = 1.3; // sizing factor
@@ -279,9 +279,7 @@
 					   .enter()
 					   .append("circle")
 					   .attr("r", r)
-					   .attr("fill", function(d) {
-					   		return determine_color(genre);
-				   		})
+					   .attr("fill", "rgb(0, 255, 0")
 					   .attr("cx", function(d, i) {
 					   	return circle_padding + d[0];
 					   })
@@ -291,8 +289,8 @@
 					   .on("mouseover", function(d) {
 					   		d3.select(this)
 					  		.attr("fill", "orange");
-					  		var cxPosition = parseFloat(d3.select(this).attr("cx")) + circle_padding + pad; 
-					  		var cyPosition = parseFloat(d3.select(this).attr("cy")) + 775 / 1.3 + pad;
+					  		var cxPosition = parseFloat(d3.select(this).attr("cx")) + 1200 / 1.3 + circle_padding; 
+					  		var cyPosition = parseFloat(d3.select(this).attr("cy")) + 200;
 					  		d3.select("#tooltip_2")
 					  		.style("left", cxPosition + "px")
 					  		.style("top", cyPosition + "px")
@@ -304,7 +302,7 @@
 					   		d3.select(this)
 					   		.transition()
           			  		.duration(500)
-					  		.attr("fill", determine_color(genre));
+					  		.attr("fill", "rgb(0, 255, 0");
 					  		d3.select("#tooltip_2").classed("hidden_2", true);
 					   });
 				scatter.selectAll('text')

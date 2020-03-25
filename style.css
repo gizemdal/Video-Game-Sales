@@ -50,7 +50,7 @@ body {background-color: black;}
 
 .axis path, .axis line {
 	stroke: rgb(0, 255, 0);
-	shape-rendering: crispEdges; 
+	shape-rendering: crispEdges;
 }
 
 #axis_x text {
@@ -152,10 +152,11 @@ ul {
 }
 
 /* your colors */
-.legend .Sports { background-color: #80ff00; }
+.legend .Sports { background-color: #00ff7f; }
 .legend .Action { background-color: #7f00ff; }
-.legend .Misc { background-color: #ff007f; }
+.legend .Shooter { background-color: #0000ff; }
 .legend .Platform { background-color: #ff0000; }
 .legend .Racing { background-color: #ffff00; }
 .legend .Puzzle { background-color: #ff00ff; }
 .legend .Fighting { background-color: #00ffff; }
+.legend .Role-Playing { background-color: #ff007f; }
