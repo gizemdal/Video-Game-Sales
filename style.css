@@ -1,8 +1,9 @@
 body {background-color: black;}
 
 .svg {
-	display: block;
-	margin: auto;
+	float: left;
+	display: inline;
+	margin-left: 15px;
 }
 
 #header {
@@ -18,27 +19,28 @@ body {background-color: black;}
 	color: rgb(0, 255, 0);
 }
 
-.scatter-title {
-	color: rgb(0, 255, 0);
-	text-align: center;
-	font-family: Optima, Futura, sans-serif;
-	font-weight: lighter;
-	font-size: 20px;
-}
-
-.scatter-platform {
-	fill: white;
-	font-family: Optima, Futura, sans-serif;
-	font-weight: lighter;
-	font-size: 10px;
-}
-
 .svg-info {
 	padding-left: 45px;
 	padding-right: 45px;
 	padding-bottom: 25px;
     font-size: 14px;
     color: white;
+}
+
+.scatter-title {
+	color: rgb(0, 255, 0);
+	font-family: Optima, Futura, sans-serif;
+	font-weight: lighter;
+	font-size: 14px;
+}
+
+.scatter-platform {
+	fill: white;
+	margin: auto;
+	display: block;
+	font-family: Optima, Futura, sans-serif;
+	font-weight: lighter;
+	font-size: 10px;
 }
 
 .bar {
@@ -124,3 +126,36 @@ body {background-color: black;}
 	font-size: 16px;
 	line-height: 20px;
 }
+
+#graph_legend {
+	color: white;
+}
+
+/* basic positioning */
+ul {
+	list-style-type: none;
+	font-family: Optima, Futura, sans-serif;
+	font-weight: lighter;
+	font-size: 14px;
+}
+
+.legend li {
+	margin-right: 10px; 
+	display: inline-block;
+}
+.legend span { 
+	border: 1px; 
+	float: left; 
+	width: 12px; 
+	height: 12px; 
+	margin: 3px; 
+}
+
+/* your colors */
+.legend .Sports { background-color: #80ff00; }
+.legend .Action { background-color: #7f00ff; }
+.legend .Misc { background-color: #ff007f; }
+.legend .Platform { background-color: #ff0000; }
+.legend .Racing { background-color: #ffff00; }
+.legend .Puzzle { background-color: #ff00ff; }
+.legend .Fighting { background-color: #00ffff; }

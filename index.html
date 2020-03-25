@@ -18,7 +18,9 @@
 			var platform_data; // to be filled later
 			var top_five_data; // to be filled later
 			var sale_data; // to be filled later
+			var genre_data; // to be filled later
 			var max_platform_sale; // to be filled later
+			var used_genres = []; // to be filled later
 
 			var scatter; // to be filled later
 			var is_init_scatter = false;
@@ -84,6 +86,38 @@
 				return [max_val, max_platform];
 			};
 
+			var determine_color = function(genre) {
+				// find out which genre is passed
+				if (genre === 'Sports') {	
+					return "rgb(128, 255, 0)";
+				} else if (genre === 'Platform') {
+					return "rgb(255, 0, 0)";
+				} else if (genre === 'Racing') {
+					return "rgb(255, 255, 0)";
+				} else if (genre === 'Role-Playing') {
+					return "rgb(255, 128, 0)";
+				} else if (genre === 'Puzzle') {
+					return "rgb(255, 0, 255)";
+				} else if (genre === 'Misc') {
+					return "rgb(255, 0, 127)";
+				} else if (genre === 'Shooter') {
+					return "rgb(0, 0, 255)";
+				} else if (genre === 'Simulation') {
+					return "rgb(0, 255, 128)";
+				} else if (genre === 'Action') {
+					return "rgb(127, 0, 255)";
+				} else if (genre === 'Fighting') {
+					return "rgb(0, 255, 255)";
+				} else if (genre === 'Adventure') {
+					return "rgb(255, 255, 255)";
+				} else if (genre === 'Strategy') {
+					return "rgb(128, 128, 128)";
+				} else {
+					// if genre is undefined
+					return "rgb(0, 0, 0)";
+				}
+			};
+
 			var generateDivs = function() {
 				// add title
 				var svg_title = d3.select("body")
@@ -129,8 +163,14 @@
 			    .enter()
 			    .append("rect")
 			    .attr("fill", function(d) {
-			    	var strength = (d["sales"] * (255)) / (d3.max(sale_data, function(d) { return d["sales"]; }));
-			   		return "rgb(" + (255 - Math.floor(strength)) + ", 255, " + (255 - Math.floor(strength)) + ")";
+			    	if (used_genres.indexOf(genre_data[d["year"] - 1980]['genre']) < 0) {
+			    		// genre not put yet
+			    		used_genres.push(genre_data[d["year"] - 1980]['genre']);
+			    	}
+			    	var color = determine_color(genre_data[d["year"] - 1980]['genre']);
+			    	//var strength = (d["sales"] * (255)) / (d3.max(sale_data, function(d) { return d["sales"]; }));
+			   		//return "rgb(" + (255 - Math.floor(strength)) + ", 255, " + (255 - Math.floor(strength)) + ")";
+			   		return color;
 			    })
 				.attr("y", function(d) {
 					return h - (d["sales"] / size_factor + 1.5) - bar_padding * 2;
@@ -147,7 +187,7 @@
 					d3.select(this)
 					  .attr("fill", "orange")
 					  var xPosition = parseFloat(d3.select(this).attr("x")) + bar_padding; 
-					  var yPosition = parseFloat(d3.select(this).attr("y")) + 30;
+					  var yPosition = parseFloat(d3.select(this).attr("y")) + 85;
 					  //Update the tooltip position and value
 					  d3.select("#tooltip_1")
 					  .style("left", xPosition + "px")
@@ -169,12 +209,16 @@
 					  .transition()
           			  .duration(250)
 					  .attr("fill", function(d) {
-			    		var strength = (d["sales"] * (255)) / (d3.max(sale_data, function(d) { return d["sales"]; }));
-			   			return "rgb(" + (255 - Math.floor(strength)) + ", 255, " + (255 - Math.floor(strength)) + ")";
+					  	var color = determine_color(genre_data[d["year"] - 1980]['genre']);
+					  	return color;
+			    		//var strength = (d["sales"] * (255)) / (d3.max(sale_data, function(d) { return d["sales"]; }));
+			   			//return "rgb(" + (255 - Math.floor(strength)) + ", 255, " + (255 - Math.floor(strength)) + ")";
 					  });
 					//Hide the tooltip
 					d3.select("#tooltip_1").classed("hidden_1", true);
 				});
+
+				display_legend();
 
 				// Add axis
 
@@ -209,7 +253,7 @@
 			};
 
 			var initScatter = function() {
-				var scatter_w = 600; // width
+				var scatter_w = 450; // width
 				var scatter_h = 700; // height
 				scatter = d3.select("body")
 							.append("svg")
@@ -219,10 +263,11 @@
 			}
 
 			var scatterPlot = function(year) {
-				var w = 600; // width
+				var w = 450; // width
 				var r = 10; // radius
 				var circle_padding = 30; // padding
 				var sub_data = top_five_data[year - 1980]["values"];
+				var genre = genre_data[year - 1980]['genre'];
 				var h = (r * 2) * sub_data.length + (circle_padding - r * 2) * (sub_data.length - 1); // height
 				var pad = (r * 2) + 70; // padding from the top
 				var bottom_padding = 20;
@@ -235,7 +280,7 @@
 					   .append("circle")
 					   .attr("r", r)
 					   .attr("fill", function(d) {
-					   		return "rgb(0, 255, 0)";
+					   		return determine_color(genre);
 				   		})
 					   .attr("cx", function(d, i) {
 					   	return circle_padding + d[0];
@@ -259,7 +304,7 @@
 					   		d3.select(this)
 					   		.transition()
           			  		.duration(500)
-					  		.attr("fill", "rgb(0, 255, 0)");
+					  		.attr("fill", determine_color(genre));
 					  		d3.select("#tooltip_2").classed("hidden_2", true);
 					   });
 				scatter.selectAll('text')
@@ -297,6 +342,35 @@
         		   .attr("transform", "translate(0," + (h - circle_padding / 1.5) + ")")
 				   .call(xAxis);
 				
+			};
+
+			var display_legend = function() {
+				var legend_w = 200; // width
+				var legend_h = 200; // height
+				var legend = d3.select("body")
+							.append("div")
+							.attr("id", "graph_legend")
+							.attr("width", legend_w)
+							.attr("height", legend_h);
+				var legend_ul = d3.select("#graph_legend")
+								   .append('ul')
+								   .attr("class", "legend");
+
+				legend_ul.selectAll('li')
+						 .data(used_genres)
+						 .enter()
+						 .append('li')
+						 .append('span')
+						 .attr("class", function(d) {
+						 	return d;
+						 });
+
+				legend_ul.selectAll('li')
+						 .data(used_genres)
+						 .append('text')
+						 .text(function(d) {
+						 	return d;
+						 });
 			};
 
 			d3.csv("platform_years.csv", function(d) {
@@ -338,11 +412,7 @@
 					year_2013: +d.year_2013,
 					year_2014: +d.year_2014,
 					year_2015: +d.year_2015,
-					year_2016: +d.year_2016,
-					year_2017: +d.year_2017,
-					year_2018: +d.year_2018,
-					year_2019: +d.year_2019,
-					year_2020: +d.year_2020
+					year_2016: +d.year_2016
 				};
 			}).then(function(data) {
 				platform_data = data;
@@ -356,7 +426,15 @@
 					};
 				}).then(function(data) {
 					sale_data = data;
-					generateDivs();
+					d3.csv("years_and_popular_genres.csv", function(d) {
+						return {
+							year: +d.Year,
+							genre: d.Genre
+						};
+					}).then(function(data) {
+						genre_data = data;
+						generateDivs();
+					});
 				});
 			});
 
