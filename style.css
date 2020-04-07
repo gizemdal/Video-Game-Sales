@@ -70,7 +70,7 @@ body {background-color: black;}
 #axis_y text {
 	font-family: Optima, Futura, sans-serif;
 	font-weight: lighter;
-	font-size: 4px;
+	font-size: 10px;
 	fill: white;
 }
 

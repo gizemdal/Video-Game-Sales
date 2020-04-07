@@ -136,9 +136,10 @@
 								  .text("Below is a bar chart that displays the amount of global sales (in millions) made from top 16000 worldwide video games. Each global sale data represents how many sales the video games that were released in a particular year made in total. Colors represent the most popular video game genre in a given year. You can hover over the bars to get numeric detail and visualize the number of individual global sales made by the top 5 popular platforms through video games that were released in that year. You can also see the exact numbers when you hover over the points on the scatter plot generated below.");
 
 				// Simple bar chart made of divs
+				var margin = {top: 20, right: 80, bottom: 30, left: 50};
 				var size_factor = 1.3; // sizing factor
-				var w = 1200 / size_factor; // width
-				var h = 775 / size_factor; // height
+				var w = 1200 / size_factor - margin.left - margin.right; // width
+				var h = 775 / size_factor - margin.top - margin.bottom; // height
 				var bar_padding = 20 / size_factor; // padding
 				var bar_width = 15 / size_factor; // bar width
 
@@ -155,8 +156,10 @@
 				var svg = d3.select("body")
 							.append("svg")
 							.attr("class", "svg")
-							.attr("width", w)
-							.attr("height", h);
+							.attr("width", w + margin.left + margin.right)
+							.attr("height", h + margin.top + margin.bottom)
+							.append("g")
+							.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 				svg.selectAll("rect")
 			    .data(sale_data)
@@ -173,7 +176,7 @@
 			   		return color;
 			    })
 				.attr("y", function(d) {
-					return h - (d["sales"] / size_factor + 1.5) - bar_padding * 2;
+					return h - (d["sales"] / size_factor + 1.5) - bar_padding * 1.35;
 				})
 				.attr("x", function(d, i) {
 					var dist = i * ((w - bar_padding) / sale_data.length);
@@ -236,19 +239,19 @@
 				svg.append("text")
 				   .attr("class", "y_label")
 				   .attr("text-anchor", "end")
-				   .attr("x", w - bar_padding / 4)
-				   .attr("y", h - 20)
+				   .attr("x", w + bar_padding)
+				   .attr("y", h - bar_padding)
 				   .text("Year");
 				svg.append("text")
 				   .attr("class", "y_label")
 				   .attr("text-anchor", "end")
 				   .attr("x", bar_padding * 7.5)
-				   .attr("y", bar_padding * 2.5)
+				   .attr("y", -bar_padding * 0.5)
 				   .text("Global Sales (in millions)");
 				svg.append("g")
 				   .attr("class", "axis")
 				   .attr("id", "axis_y")
-				   .attr("transform", "translate(" + (bar_padding) + "," + 53 / size_factor + ")")
+				   .attr("transform", "translate(" + (bar_padding) + ",0)")
 				   .call(yAxis)
 			};
 
