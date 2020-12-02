@@ -1,10 +1,10 @@
 # Video Game Sales Visualization with D3
 
+![Sneak peek](readme_img.png)
+
 [Video Game Sales Dataset](https://www.kaggle.com/gregorut/videogamesales#vgsales.csv) (Additional data is collected by using Pandas & Python which can be found in this repository)
 
 [Live demo](https://gizemdal.github.io/Video-Game-Sales/)
-
-----------------------------
 
 ## Summary
 
